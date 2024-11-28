@@ -1,6 +1,14 @@
 # pyUpgrade
 A Python Script to create item upgrades to be compatible with KryptoHack's Upgrade Weapons And Armor mod. This script can be used to create standalone stats and itemCombo files or create a mod. The only requirement is that you must have a Weapons.txt file from another mod you want to create the upgrades for, Armor stats files aren't supported yet (but will be soon). 
 
+## Installation
+
+1. Open a terminal and type `git clone https://github.com/3Xploitd/BG3-pyUpgrade.git`
+2. Type `cd .\BG3-pyUpgrade`
+3. Type `pip install -r requirements.txt`
+
+Or download the zip file and open a terminal in the extracted folder directory. Then type `pip install -r requirements.txt`
+
 ## Usage
 ~~~python
 usage: pyUpgrade.py [-h] -op {create_mod,files_only} [-n MODNAME] [-e ENCHANTMENT] -p PATH -s STATS_FILE -a AUTHOR_NAME
