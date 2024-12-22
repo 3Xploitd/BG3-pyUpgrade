@@ -11,6 +11,20 @@ import shutil
 from time import time
 
 
+def write_data_to_file(stats_file, file_index,path):
+    called_func_name = inspect.currentframe().f_back.f_code.co_name
+    if called_func_name == 'create_upgrades':
+        if file_index == 0:
+            file_path = WeaponUpgrades
+        else:
+
+            file_path = WeaponUpgrades.replace('ItemCombos.txt',f'ItemCombos{file_index}.txt')
+    with open(file_path, 'w') as f:
+        f.write(stats_file)
+        f.close()
+    file_index += 1
+    stats_file = ''
+    return stats_file, file_index
 ## Creates the upgrade combinations from the weapon upgrade file
 
 def gen_combos(path,enchantment_dict):
@@ -18,14 +32,19 @@ def gen_combos(path,enchantment_dict):
     item_combo_dict = enchantment_dict
     eq_name = re.findall(r'new entry "(.+)"\n', file)
     stats_file = ''
+    file_index = 0
 
     ## parses the stats file for the name of the upgrade
     bar_format = '{l_bar}{bar}| {n_fmt}/{total_fmt}'
 
     try:
         for item in tqdm(eq_name,desc='Generating Upgrade Combinations', bar_format=bar_format, colour='magenta', leave=False):
+            if len(stats_file.encode('utf-8')) >= 20971520:
+                stats_file, file_index = write_data_to_file(stats_file, file_index, UpgradedCombos)
+
             bonus_word = re.findall(r'Plus(\w+)',item)
             item2 = re.findall(r'(.+)_Plus',item)
+
             if item2 != []:
                 item2 = item2[0]
     ## creates the name of the original item that is used to create the upgrade
@@ -68,6 +87,7 @@ def gen_combos(path,enchantment_dict):
                 stats_file += item_combo
                 stats_file += item_combo2
                 stats_file += item_combo3
+
             else:
                 continue
         print('[+] Created Upgrade Combinations')
@@ -128,14 +148,14 @@ def create_upgrades(path, max_enchantment, enchantment_dict):
                     if default_boosts[0].count('WeaponProperty(Magical)') != 1:
                         append_enchantment + ';WeaponProperty(Magical)'
                     enchanted_item = enchanted_item.replace(default_boosts[0], append_enchantment)
-                regex = re.findall(r'"WeaponEnchantment\((\d)\)',enchanted_item)
+                regex = re.findall(r'WeaponEnchantment\((\d)\)',enchanted_item)
                 if regex == []:
                     continue
                 if int(regex[0]) >= int(i):
                     continue
                 if regex != []:
                     enchantment_word = '_Plus' + enchantment_dict[i]
-                    item_name = re.findall(r'new entry "(.+)"\n', enchanted_item)
+                    item_name = re.findall(r'new entry "(.+)".*\n', enchanted_item)
                     if item_name != []:
                         item_name_updated = item_name[0] + enchantment_word
                         enchanted_item = enchanted_item.replace(f'new entry "{item_name[0]}"', f'new entry "{item_name_updated}"')
