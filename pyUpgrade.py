@@ -133,6 +133,7 @@ def create_upgrades(path, max_enchantment, enchantment_dict):
     stats_list = stats_file.split('\n\n')
     eq_file = ''
     bar_format = '{l_bar}{bar}| {n_fmt}/{total_fmt}'
+    enchantment_type = ''
 
     try:
 
@@ -140,15 +141,50 @@ def create_upgrades(path, max_enchantment, enchantment_dict):
             for i in range(1, int(max_enchantment)+1):
                 enchanted_item = item
                 i = str(i)
-                if 'data "DefaultBoosts"' not in item:
-                    enchanted_item = enchanted_item + '\ndata "DefaultBoosts" "WeaponEnchantment(0);WeaponProperty(Magical)"'
-                if 'WeaponEnchantment' not in enchanted_item:
-                    default_boosts = re.findall(r'data "DefaultBoosts" "(.+)"', enchanted_item)
-                    append_enchantment = default_boosts[0] + ';WeaponEnchantment(0)'
-                    if default_boosts[0].count('WeaponProperty(Magical)') != 1:
-                        append_enchantment + ';WeaponProperty(Magical)'
-                    enchanted_item = enchanted_item.replace(default_boosts[0], append_enchantment)
-                regex = re.findall(r'WeaponEnchantment\((\d)\)',enchanted_item)
+                IsWeaponType = item.count('type "Weapon"')
+                IsArmorType = item.count('type "Armor"')
+                if IsArmorType != 0:
+                    enchantment_type = 'AC'
+                    if 'data "Boosts"' not in item:
+                        IsBoostsOnEquipPresent = item.count('data "BoostsOnEquip"')
+                        IsBoostsPresent = item.count('data "Boosts"')
+
+                        if IsBoostsOnEquipPresent == 0 and IsBoostsPresent == 0:
+                            enchanted_item = enchanted_item + '\ndata "Boosts" "AC(0)"'
+                        if IsBoostsOnEquipPresent != 0 and IsBoostsPresent == 0:
+                            boosts_on_equip = re.findall(r'data "BoostsOnEquip" "(.+)"',enchanted_item)
+                            append_enchantment = boosts_on_equip[0] + ';AC(0)'
+                            if boosts_on_equip != []:
+                                ac_boost = re.findall(r'AC\([0-9]\)',boosts_on_equip)
+                                if ac_boost == []:
+                                    enchanted_item = enchanted_item.replace(boosts_on_equip[0],append_enchantment)
+
+                        if IsBoostsPresent != 0 and IsBoostsOnEquipPresent == 0:
+                            boosts = re.findall(r'data "Boosts" "(.+)"',enchanted_item)
+                            append_enchantment = boosts[0] + ';AC(0)'
+                            if boosts != []:
+                                ac_boost = re.findall(r'AC\([0-9]\)',boosts)
+                                if ac_boost == []:
+                                    enchanted_item = enchanted_item.replace(boosts[0],append_enchantment)
+                        if IsBoostsOnEquipPresent != 0 and IsBoostsPresent != 0:
+                            ac_boost = re.findall(r'AC\([0-9]\)',enchanted_item)
+                            if ac_boost == []:
+                                boosts = re.findall(r'data "Boosts" "(.+)"',enchanted_item)
+                                append_enchantment = boosts[0] + ';AC(0)'
+                                enchanted_item = enchanted_item.replace(boosts[0],append_enchantment)
+
+                if IsWeaponType != 0:
+                    enchantment_type = 'WeaponEnchantment'
+                    if 'data "DefaultBoosts"' not in item:
+                        enchanted_item = enchanted_item + '\ndata "DefaultBoosts" "WeaponEnchantment(0);WeaponProperty(Magical)"'
+                    if 'WeaponEnchantment' not in enchanted_item:
+                        default_boosts = re.findall(r'data "DefaultBoosts" "(.+)"', enchanted_item)
+                        append_enchantment = default_boosts[0] + ';WeaponEnchantment(0)'
+                        if default_boosts[0].count('WeaponProperty(Magical)') != 1:
+                            append_enchantment + ';WeaponProperty(Magical)'
+                        enchanted_item = enchanted_item.replace(default_boosts[0], append_enchantment)
+
+                regex = re.findall(fr'{enchantment_type}\((\d)\)',enchanted_item)
                 if regex == []:
                     continue
                 if int(regex[0]) >= int(i):
@@ -159,7 +195,7 @@ def create_upgrades(path, max_enchantment, enchantment_dict):
                     if item_name != []:
                         item_name_updated = item_name[0] + enchantment_word
                         enchanted_item = enchanted_item.replace(f'new entry "{item_name[0]}"', f'new entry "{item_name_updated}"')
-                        enchanted_item = enchanted_item.replace(f'WeaponEnchantment({regex[0]})',f'WeaponEnchantment({i})')
+                        enchanted_item = enchanted_item.replace(f'{enchantment_type}({regex[0]})',f'{enchantment_type}({i})')
                         enchanted_item += '\n\n'
                         eq_file += enchanted_item
                     else:
@@ -206,7 +242,7 @@ def create_mod(path,modname,operation,author,description):
             os.mkdir(f'{path}\\Public\\{mod_folder}\\Stats\\Generated')
             UpgradedCombos = f'{path}\\Public\\{mod_folder}\\Stats\\Generated\\ItemCombos.txt'
             os.mkdir(f'{path}\\Public\\{mod_folder}\\Stats\\Generated\\Data')
-            WeaponUpgrades = f'{path}\\Public\\{mod_folder}\\Stats\\Generated\\Data\\Weapons.txt'
+            WeaponUpgrades = f'{path}\\Public\\{mod_folder}\\Stats\\Generated\\Data\\Upgrades.txt'
             print('[+] Created mod file structure')
 
         except Exception as e:
