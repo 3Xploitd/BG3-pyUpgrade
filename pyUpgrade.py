@@ -277,10 +277,10 @@ def create_mod(path,modname,operation,author,description):
 					<attribute id="Tags" type="LSWString" value="" />
 					<attribute id="Type" type="FixedString" value="Add-on" />
 					<attribute id="UUID" type="FixedString" value="{mod_uuid}" />
-					<attribute id="Version64" type="int64" value="144820164012315624" />
+					<attribute id="Version64" type="int64" value="36028797018963968" />
 					<children>
             <node id="PublishVersion">
-              <attribute id="Version64" type="int64" value="144820164012315624" />
+              <attribute id="Version64" type="int64" value="36028797018963968" />
             </node>
             <node id="Scripts" />
             <node id="TargetModes">
