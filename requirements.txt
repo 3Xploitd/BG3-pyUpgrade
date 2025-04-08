@@ -1,1 +1,3 @@
 tqdm
+word2number
+num2words
